@@ -1,0 +1,158 @@
+Problem koji se rešava u ovom radu se svodi na problem klasifikacije. Na osnovu podataka pacijenta, dobijenih prethodno opisanim metodama vektorizacije, potrebno je doneti pretpostavku o mogucim uzrocima smrti.
+U slučaju kada imamo više klasa, uzroka smrti, postoje dva arhitekturalna pristupa pri kreiranju klasifikacionog modela. Prvi pristup jeste kreiranje multi-class modela, na čijem izlazu se nalazi jedna izabrana klasa od N mogućih, a drugi pristup je kreiranje ansambla od N modela gde se za svaku klasu trenira zaseban model koji nam govori da li taj podatak pripada toj klasi ili ne.
+
+Postoji mnoštvo modela mašinskog učenja koji se mogu iskoristiti za potrebe klasifikacije. Na izbor je uticala brzina kreiranja, performanse, lakoća optimizacije i preporuke relevantne literature.
+U ovom radu su korišćeni sledeći modeli: Potpuno povezana neuronska mreža, decision tree, xgboost.
+Svaki od ovih modela je korišćen u obe arhitekture klasifikacionih modela a davali su uporedive rezultate. Određeni modeli su bolje prepoznavali neke uzroke smrti u odnosu na druge modele, i obrnuto.
+Ipak, veća pažnja je data neuronskim mrežama i stablima odlučivanja iz razloga što je njihovo obučavanje bilo brže te se moglo pristupiti optimizaciji rezultata.
+
+Nakon brojnih eksperimenata došlo se do optimalne arhitekture neuronske mreže koja se sastoji od:
+- 3 skrivena sloja u obliku levka (2046, 516, 128 čvorova po slojevima)
+- Batch normalizacije izmedju svakog sloja
+- Selu aktivacionom funkcijom na skrivenim slojevima
+- Dropout od 20%
+- Categorical Crossentropy loss i softmax aktivacionom funkcijom na izlaznom sloju
+- Adam optimizator
+Metrike koje su korišćene za praćenje obučavanja su: tačnost, preciznost, odziv, auc, prc
+
+Optimizacija rezultata stabla obučavanja je vršena automatski i došlo se do sledećih parametara modela:
+- Kriterijum mere kvaliteta podele: "entropy"
+- Maksimalna dubina stabla: 3
+- Minimalni broj primera potrebnih za podelu čvora: 2
+- Minimalni broj primera potrebnih da čvor bude list: 1
+
+
+
+VECTORIZATION V2
+
+
+
+	MULTICLASS
+
+
+
+
+							  NN Multi Class			  | XGBoost Multi Class
+							  precision    recall  f1-score   support |precision    recall  f1-score   support 
+
+                          Alzheimer's disease (disorder)       0.29      0.33      0.31         6 |	0.50      0.50      0.50
+                    Burn injury(morphologic abnormality)       0.18      0.06      0.09        33 |	0.00      0.00      0.00
+                                                COVID-19       0.68      0.60      0.64       402 |	0.82      0.85      0.83
+                                          Cardiac Arrest       0.18      0.06      0.09        86 |	0.38      0.06      0.10
+             Chronic congestive heart failure (disorder)       0.95      0.97      0.96       175 |	0.94      1.00      0.97
+               Chronic obstructive bronchitis (disorder)       0.85      0.73      0.79        56 |	0.88      0.80      0.84
+                              Concussion injury of brain       0.14      0.02      0.04        95 |	0.31      0.05      0.09
+                  Death due to acute respiratory failure       1.00      0.83      0.91         6 |	1.00      0.83      0.91
+                                     Death due to sepsis       0.00      0.00      0.00         0 |	0.00      0.00      0.00
+                      End stage renal disease (disorder)       0.00      0.00      0.00         0 |	0.00      0.00      0.00
+  Familial Alzheimer's disease of early onset (disorder)       0.44      0.44      0.44         9 |	0.56      0.56      0.56
+Fracture of the vertebral column with spinal cord injury       0.00      0.00      0.00        43 |	0.00      0.00      0.00
+                 Malignant neoplasm of breast (disorder)       0.88      0.74      0.80        38 |	0.97      0.76      0.85
+                                Malignant tumor of colon       0.76      0.96      0.85        23 |	0.96      0.96      0.96
+                             Meningomyelocele (disorder)       0.80      0.50      0.62         8 |	0.75      0.38      0.50
+                                   Myocardial Infarction       0.70      0.79      0.74       304 |	0.77      0.87      0.81
+                        Natural death with unknown cause       0.78      0.83      0.81      1562 |	0.81      0.93      0.86
+                                    Neoplasm of prostate       1.00      0.54      0.70        13 |	0.75      0.69      0.72
+                   Non-small cell lung cancer (disorder)       0.93      1.00      0.96        40 |	0.95      0.97      0.96
+                 Overlapping malignant neoplasm of colon       0.82      0.64      0.72        14 |	0.93      1.00      0.97
+                                               Pneumonia       0.30      0.19      0.23        16 |	0.40      0.50      0.44
+                              Postoperative complication       0.00      0.00      0.00         1 |	0.00      0.00      0.00
+                     Primary malignant neoplasm of colon       0.00      0.00      0.00         2 |	1.00      0.50      0.67
+                          Pulmonary emphysema (disorder)       0.73      0.80      0.76        50 |	0.67      0.92      0.77
+                   Secondary malignant neoplasm of colon       0.93      0.93      0.93        15 |	1.00      1.00      1.00
+                                   Sepsis of Pseudomonas       0.00      0.00      0.00         0 |	0.00      0.00      0.00
+                 Small cell carcinoma of lung (disorder)       1.00      1.00      1.00         6 |	1.00      1.00      1.00
+                                                  Stroke       0.17      0.11      0.13        94 |	0.00      0.00      0.00
+                                    Sudden Cardiac Death       0.98      1.00      0.99       738 |	0.98      1.00      0.99
+
+										  14.51
+										   0.5 / 0.55 macro			  0.6 / 0.67 macro
+
+                                               micro avg       0.80      0.76      0.78      3835 |	                    0.84
+                                               macro avg       0.53      0.49      0.50      3835 |	0.64      0.60      0.60
+                                            weighted avg       0.75      0.76      0.76      3835 |	0.79      0.84      0.81      3835
+
+
+	ASNAMBL
+
+
+
+
+							  NN Single Class			  | Decision Tree Single Class
+							  precision    recall  f1-score   support |precision    recall  f1-score   support 
+
+                          Alzheimer's disease (disorder)       0.30      0.50      0.37         6 |	0.00      0.00      0.00         6
+                    Burn injury(morphologic abnormality)       0.00      0.00      0.00        33 |	0.00      0.00      0.00        33
+                                                COVID-19       0.71      0.63      0.67       402 |	0.80      0.75      0.77       402
+                                          Cardiac Arrest       0.26      0.08      0.12        86 |	0.00      0.00      0.00        86
+             Chronic congestive heart failure (disorder)       0.96      0.98      0.97       175 |	0.94      0.99      0.97       175
+               Chronic obstructive bronchitis (disorder)       0.80      0.64      0.71        56 |	0.79      0.82      0.81        56
+                              Concussion injury of brain       0.33      0.03      0.06        95 |	0.00      0.00      0.00        95
+                  Death due to acute respiratory failure       1.00      0.83      0.91         6 |	1.00      0.67      0.80         6
+                                     Death due to sepsis       0.00      0.00      0.00         0 |	0.00      0.00      0.00
+                      End stage renal disease (disorder)       0.00      0.00      0.00         0 |	0.00      0.00      0.00
+  Familial Alzheimer's disease of early onset (disorder)       0.47      0.78      0.58         9 |	0.41      0.78      0.54         9
+Fracture of the vertebral column with spinal cord injury       0.20      0.02      0.04        43 |	0.00      0.00      0.00
+                 Malignant neoplasm of breast (disorder)       0.85      0.74      0.79        38 |	0.97      0.76      0.85        38
+                                Malignant tumor of colon       0.75      0.78      0.77        23 |	0.88      1.00      0.94        23
+                             Meningomyelocele (disorder)       1.00      0.50      0.67         8 |	1.00      0.50      0.67         8
+                                   Myocardial Infarction       0.73      0.62      0.67       304 |	0.75      0.87      0.80       304
+                        Natural death with unknown cause       0.79      0.85      0.82      1562 |	0.92      0.35      0.50      1562
+                                    Neoplasm of prostate       0.78      0.54      0.64        13 |	0.80      0.62      0.70        13
+                   Non-small cell lung cancer (disorder)       0.93      1.00      0.96        40 |	0.95      1.00      0.98        40
+                 Overlapping malignant neoplasm of colon       0.70      1.00      0.82        14 |	0.82      0.64      0.72        14
+                                               Pneumonia       0.40      0.38      0.39        16 |	0.36      0.56      0.44        16
+                              Postoperative complication       0.00      0.00      0.00         1 |	0.00      0.00      0.00         1
+                     Primary malignant neoplasm of colon       0.50      0.50      0.50         2 |	0.50      0.50      0.50         2
+                          Pulmonary emphysema (disorder)       0.67      0.70      0.69        50 |	0.60      0.94      0.73        50
+                   Secondary malignant neoplasm of colon       0.93      0.93      0.93        15 |	1.00      1.00      1.00        15
+                                   Sepsis of Pseudomonas       0.00      0.00      0.00         0 |	0.00      0.00      0.00
+                 Small cell carcinoma of lung (disorder)       1.00      1.00      1.00         6 |	1.00      1.00      1.00         6
+                                                  Stroke       0.11      0.07      0.09        94 |	0.00      0.00      0.00
+                                    Sudden Cardiac Death       0.98      1.00      0.99       738 |	0.98      0.99      0.99       738
+
+										  15.16					  14.71
+										   0.52 / 0.58 macro			  0.51 / 0.56 macro
+
+
+                                               macro avg       0.00      0.00      0.52      3835 |	0.00      0.00      0.51
+
+VECTORIZATION V1
+
+							  less good				  |
+              						  precision    recall  f1-score   support |
+
+                          Alzheimer's disease (disorder)       0.50      0.33      0.40         3 |	1.00	0.17	0.29
+                    Burn injury(morphologic abnormality)       0.00      0.00      0.00        34 |	1.00	0.82	0.90
+                                                COVID-19       0.26      0.31      0.28       403 |	0.99	0.99	0.99
+                                          Cardiac Arrest       0.00      0.00      0.00        90 |	1.00	0.87	0.93
+             Chronic congestive heart failure (disorder)       0.96      0.94      0.95       184 |	0.95	0.99	0.97
+               Chronic obstructive bronchitis (disorder)       0.10      0.02      0.03        53 |	0.98	0.95	0.96
+                              Concussion injury of brain       0.11      0.04      0.06        77 |	0.96	0.96	0.96
+                  Death due to acute respiratory failure       0.00      0.00      0.00         7 |	1.00	0.83	0.91
+                                     Death due to sepsis       0.00      0.00      0.00         0 |	0.00    0.00    0.00  
+                      End stage renal disease (disorder)       0.00      0.00      0.00         0 |	0.00    0.00    0.00  
+  Familial Alzheimer's disease of early onset (disorder)       0.00      0.00      0.00        13 |	1.00	0.89	0.94
+Fracture of the vertebral column with spinal cord injury       0.00      0.00      0.00        37 |	1.00	0.95	0.98
+                 Malignant neoplasm of breast (disorder)       0.82      0.70      0.75        33 |	0.97	0.82	0.89
+                                Malignant tumor of colon       0.64      0.86      0.73        21 |	0.95	0.87	0.91
+                             Meningomyelocele (disorder)       0.50      1.00      0.67         1 |	1.00	1.00	1.00
+                                   Myocardial Infarction       0.33      0.20      0.25       302 |	1.00	0.95	0.97
+                        Natural death with unknown cause       0.49      0.62      0.54      1035 |	0.95	0.99	0.97
+                                    Neoplasm of prostate       0.00      0.00      0.00        14 |	1.00	0.38	0.56
+                   Non-small cell lung cancer (disorder)       0.76      0.63      0.69        41 |	1.00	0.93	0.96
+                 Overlapping malignant neoplasm of colon       0.50      0.11      0.18        18 |	1.00	0.64	0.78
+                                               Pneumonia       0.43      0.15      0.22        20 |	1.00	0.75	0.86
+                              Postoperative complication       0.00      0.00      0.00         1 |	0.00    0.00    0.00  
+                     Primary malignant neoplasm of colon       0.00      0.00      0.00         4 |	0.00    0.00    0.00  
+                          Pulmonary emphysema (disorder)       0.19      0.08      0.12        59 |	1.00	0.90	0.95
+                   Secondary malignant neoplasm of colon       0.88      0.68      0.77        22 |	1.00	0.80	0.89
+                                   Sepsis of Pseudomonas       0.00      0.00      0.00         0 |	0.00    0.00    0.00 
+                 Small cell carcinoma of lung (disorder)       0.90      1.00      0.95         9 |	1.00	1.00	1.00
+                                                  Stroke       0.00      0.00      0.00        77 |	0.99	0.78	0.87
+                                    Sudden Cardiac Death       0.95      0.98      0.96       755 |	1.00	0.98	0.99
+ 
+                                               micro avg       0.58      0.56      0.57      3313 |	0.97	0.96	0.97
+                                               macro avg       0.32      0.30      0.30      3313 |	0.82	0.70	0.74
+                                            weighted avg       0.53      0.56      0.54      3313 |	0.97	0.96	0.97
+                                             samples avg       0.56      0.56      0.56      3313 |	0.96	0.96	0.96
